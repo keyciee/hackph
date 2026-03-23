@@ -1,399 +1,661 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HackPH — The Philippines is Waking Up</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bebas+Neue&family=Inter:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HackPH — Coming Soon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-:root {
-  --green:  #00ff88;
-  --gdim:   #00552e;
-  --cyan:   #00cfff;
-  --bg:     #04060c;
-  --text:   #8aa0b0;
-  --muted:  #1e3040;
-}
+  :root {
+    --blue: #0038A8;
+    --red: #CE1126;
+    --gold: #FCD116;
+    --white: #F5F1EB;
+    --black: #080C14;
+    --grey: #111520;
+    --dim: #1E2435;
+    --muted: #6B7A99;
+  }
 
-html, body { height: 100%; background: var(--bg); overflow: hidden; }
+  html, body {
+    height: 100%;
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Syne', sans-serif;
+    overflow-x: hidden;
+  }
 
-/* ── CANVAS ── */
-#c { position: fixed; inset: 0; z-index: 0; }
+  /* Grain */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.45;
+  }
 
-/* ── NOISE OVERLAY ── */
-.noise {
-  position: fixed; inset: 0; z-index: 1; pointer-events: none;
-  opacity: 0.04;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 200px 200px;
-}
+  /* Diagonal flag slice — blue top-left / red bottom-right */
+  .flag-bg {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .flag-bg::before {
+    content: '';
+    position: absolute;
+    top: -10%;
+    left: -5%;
+    width: 55%;
+    height: 130%;
+    background: linear-gradient(160deg, rgba(0,56,168,0.07) 0%, transparent 70%);
+    transform: skewX(-8deg);
+  }
+  .flag-bg::after {
+    content: '';
+    position: absolute;
+    bottom: -10%;
+    right: -5%;
+    width: 55%;
+    height: 130%;
+    background: linear-gradient(340deg, rgba(206,17,38,0.07) 0%, transparent 70%);
+    transform: skewX(-8deg);
+  }
 
-/* ── SCANLINES ── */
-.scan {
-  position: fixed; inset: 0; z-index: 2; pointer-events: none;
-  background: repeating-linear-gradient(
-    0deg, transparent, transparent 2px,
-    rgba(0,0,0,0.12) 2px, rgba(0,0,0,0.12) 4px
-  );
-}
+  /* Left accent — blue stripe */
+  .corner-accent {
+    position: fixed;
+    top: 0; left: 0;
+    width: 6px;
+    height: 50vh;
+    background: var(--blue);
+    z-index: 50;
+    animation: slideDown 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transform-origin: top;
+  }
+  .corner-accent-red {
+    position: fixed;
+    bottom: 0; left: 0;
+    width: 6px;
+    height: 50vh;
+    background: var(--red);
+    z-index: 50;
+    animation: slideUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transform-origin: bottom;
+  }
 
-/* ── PH FLAG STRIPE ── */
-.flag {
-  position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 20;
-  background: linear-gradient(90deg, #0038a8 33.3%, #ce1127 33.3% 66.6%, #fcd116 66.6%);
-}
+  @keyframes slideDown {
+    from { transform: scaleY(0); }
+    to { transform: scaleY(1); }
+  }
+  @keyframes slideUp {
+    from { transform: scaleY(0); }
+    to { transform: scaleY(1); }
+  }
 
-/* ── CORNER BRACKETS ── */
-.corner {
-  position: fixed; z-index: 5; width: 28px; height: 28px;
-  opacity: 0; animation: fadeIn 0.5s ease 2s forwards;
-}
-.corner svg { width: 100%; height: 100%; }
-.tl { top: 18px; left: 18px; }
-.tr { top: 18px; right: 18px; transform: scaleX(-1); }
-.bl { bottom: 18px; left: 18px; transform: scaleY(-1); }
-.br { bottom: 18px; right: 18px; transform: scale(-1); }
+  /* Sun rays in background */
+  .sun-wrap {
+    position: fixed;
+    left: -18vw;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 60vw;
+    height: 60vw;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.055;
+    animation: rotateSun 80s linear infinite;
+  }
+  @keyframes rotateSun { to { transform: translateY(-50%) rotate(360deg); } }
 
-/* ── MAIN ── */
-main {
-  position: relative; z-index: 10;
-  height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 2rem;
-}
+  .sun-ray {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 50%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold));
+    transform-origin: 0 50%;
+  }
 
-.center {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  max-width: 860px;
-  width: 100%;
-}
+  /* Grid lines */
+  .grid-lines {
+    position: fixed; inset: 0;
+    pointer-events: none; z-index: 1;
+  }
+  .grid-lines::before {
+    content: '';
+    position: absolute;
+    left: 50%; top: 0; bottom: 0;
+    width: 1px;
+    background: rgba(255,255,255,0.03);
+  }
+  .grid-lines::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 0; right: 0;
+    height: 1px;
+    background: rgba(255,255,255,0.03);
+  }
 
-/* ── GLITCH TITLE ── */
-.big-title {
-  position: relative;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(7rem, 22vw, 16rem);
-  line-height: 0.82;
-  letter-spacing: 0.06em;
-  user-select: none;
-  opacity: 0;
-  animation: fadeUp 1s cubic-bezier(0.16,1,0.3,1) 0.2s forwards;
-  margin-bottom: 0.15em;
-}
+  /* Layout */
+  .page {
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    padding: 0 5vw;
+    position: relative;
+    z-index: 2;
+  }
 
-.big-title .word-hack {
-  display: block;
-  color: #fff;
-  position: relative;
-}
+  /* Header */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2.5rem 0;
+    border-bottom: 1px solid var(--dim);
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.3s forwards;
+  }
 
-.big-title .word-ph {
-  display: block;
-  color: var(--green);
-  position: relative;
-  text-shadow:
-    0 0 60px rgba(0,255,136,0.2),
-    0 0 120px rgba(0,255,136,0.1);
-}
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
 
-/* glitch effect on .word-ph */
-.big-title .word-ph::before,
-.big-title .word-ph::after {
-  content: 'PH';
-  position: absolute;
-  inset: 0;
-  color: var(--green);
-  clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%);
-}
-.big-title .word-ph::before {
-  color: var(--cyan);
-  animation: glitch1 4s infinite step-end;
-}
-.big-title .word-ph::after {
-  color: #ff3366;
-  clip-path: polygon(0 55%, 100% 55%, 100% 75%, 0 75%);
-  animation: glitch2 4s infinite step-end;
-}
+  /* Philippine sun — 8-pointed */
+  .ph-sun {
+    width: 30px;
+    height: 30px;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .ph-sun svg {
+    width: 100%;
+    height: 100%;
+  }
 
-@keyframes glitch1 {
-  0%,94%,100% { transform: none; opacity: 0; }
-  95% { transform: translate(-4px, 2px); opacity: 0.7; }
-  97% { transform: translate(3px, -1px); opacity: 0.5; }
-}
-@keyframes glitch2 {
-  0%,91%,100% { transform: none; opacity: 0; }
-  92% { transform: translate(5px, 1px); opacity: 0.6; }
-  94% { transform: translate(-3px, 2px); opacity: 0.4; }
-}
+  .logo-text {
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  .logo-text .ph { color: var(--gold); }
 
-/* ── STATEMENT ── */
-.statement {
-  font-family: 'Inter', sans-serif;
-  font-weight: 300;
-  font-size: clamp(1rem, 2.2vw, 1.25rem);
-  line-height: 1.75;
-  color: #3d5568;
-  max-width: 560px;
-  margin-bottom: 2.8rem;
-  opacity: 0;
-  animation: fadeUp 0.9s ease 0.7s forwards;
-}
+  .badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    border: 1px solid var(--dim);
+    padding: 0.35rem 0.75rem;
+    text-transform: uppercase;
+  }
 
-.statement .line { display: block; }
+  /* Hero */
+  .hero {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 6vh 0;
+    position: relative;
+  }
 
-.statement .line-1 { color: #5a7a8a; }
-.statement .line-2 { color: #4a6878; }
-.statement .line-3 {
-  color: #8ab0c0;
-  font-style: italic;
-  margin-top: 0.4em;
-}
-.statement .accent { color: var(--green); font-style: normal; }
+  .eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.5s forwards;
+  }
 
-/* ── DIVIDER ── */
-.divider {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  width: 100%;
-  max-width: 400px;
-  margin-bottom: 2.2rem;
-  opacity: 0;
-  animation: fadeUp 0.6s ease 1.1s forwards;
-}
+  .headline {
+    font-size: clamp(4rem, 11vw, 10rem);
+    font-weight: 800;
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.6s forwards;
+  }
 
-.divider-line { flex: 1; height: 1px; background: var(--muted); }
-.divider-icon { opacity: 0.5; }
+  .headline em {
+    font-style: normal;
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--white);
+    opacity: 0.3;
+  }
 
-/* ── LAUNCHING SOON ── */
-.launch-line {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.7rem;
-  letter-spacing: 0.35em;
-  text-transform: uppercase;
-  color: var(--green);
-  opacity: 0;
-  animation: fadeUp 0.5s ease 1.3s forwards;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
+  .headline .accent-blue { color: var(--blue); }
+  .headline .accent-red  { color: var(--red); }
 
-.launch-dot {
-  width: 5px; height: 5px; border-radius: 50%;
-  background: var(--green);
-  animation: pulse 2s ease-in-out infinite;
-  flex-shrink: 0;
-}
+  .tagline {
+    margin-top: 3rem;
+    max-width: 540px;
+    font-size: 1.05rem;
+    font-weight: 400;
+    line-height: 1.7;
+    color: var(--muted);
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.75s forwards;
+  }
 
-@keyframes pulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(0,255,136,0.5); }
-  50%      { box-shadow: 0 0 0 7px rgba(0,255,136,0); }
-}
+  .tagline strong { color: var(--white); font-weight: 700; }
 
-/* ── BOTTOM TAGLINE ── */
-.bottom-tag {
-  position: fixed;
-  bottom: 22px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.6rem;
-  letter-spacing: 0.22em;
-  color: var(--muted);
-  text-transform: uppercase;
-  white-space: nowrap;
-  opacity: 0;
-  animation: fadeIn 0.5s ease 2.2s forwards;
-}
+  /* Three stars row */
+  .stars-row {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 1.4rem;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.85s forwards;
+  }
+  .star {
+    font-size: 0.9rem;
+    color: var(--gold);
+    opacity: 0.7;
+  }
 
-/* ── SIDE TEXT ── */
-.side-text {
-  position: fixed;
-  z-index: 10;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.58rem;
-  letter-spacing: 0.2em;
-  color: var(--muted);
-  text-transform: uppercase;
-  opacity: 0;
-  animation: fadeIn 0.5s ease 2s forwards;
-}
+  /* Countdown */
+  .countdown-wrap {
+    margin-top: 3.5rem;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.9s forwards;
+  }
 
-.side-left {
-  left: 22px; top: 50%;
-  transform: translateY(-50%) rotate(-90deg);
-  transform-origin: center center;
-}
-.side-right {
-  right: 22px; top: 50%;
-  transform: translateY(-50%) rotate(90deg);
-  transform-origin: center center;
-}
+  .countdown-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+  }
 
-/* ── ANIMATIONS ── */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes fadeIn {
-  from { opacity: 0; } to { opacity: 1; }
-}
+  .countdown {
+    display: flex;
+    gap: 0;
+    align-items: flex-end;
+  }
 
-/* ── RESPONSIVE ── */
-@media (max-width: 500px) {
-  .side-left, .side-right, .corner { display: none; }
-}
+  .cd-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .cd-num {
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    min-width: 2.5ch;
+    text-align: center;
+  }
+
+  .cd-sep {
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 800;
+    color: var(--gold);
+    line-height: 1;
+    padding: 0 0.3rem;
+    padding-bottom: 0.15rem;
+  }
+
+  .cd-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 0.4rem;
+  }
+
+  /* Luzon / Visayas / Mindanao region tags */
+  .region-tags {
+    display: flex;
+    gap: 0.7rem;
+    margin-top: 3.2rem;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.95s forwards;
+  }
+  .rtag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.7rem;
+    border: 1px solid var(--dim);
+    color: var(--muted);
+  }
+  .rtag.l { border-color: rgba(0,56,168,0.5); color: rgba(0,56,168,0.9); }
+  .rtag.v { border-color: rgba(252,209,22,0.4); color: rgba(252,209,22,0.8); }
+  .rtag.m { border-color: rgba(206,17,38,0.5); color: rgba(206,17,38,0.9); }
+
+  /* Email form */
+  .form-wrap {
+    margin-top: 3rem;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 1.05s forwards;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 0;
+    max-width: 480px;
+  }
+
+  .email-input {
+    flex: 1;
+    background: var(--grey);
+    border: 1px solid var(--dim);
+    border-right: none;
+    color: var(--white);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.82rem;
+    padding: 1rem 1.2rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .email-input::placeholder { color: var(--muted); }
+  .email-input:focus { border-color: var(--gold); }
+
+  .submit-btn {
+    background: var(--blue);
+    color: var(--white);
+    border: none;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 1rem 1.6rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+  }
+  .submit-btn::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--gold);
+  }
+  .submit-btn:hover { background: #002a80; }
+  .submit-btn:active { transform: scale(0.97); }
+
+  .form-note {
+    margin-top: 0.8rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  /* PH watermark */
+  .watermark {
+    position: fixed;
+    right: -2vw;
+    bottom: -4vh;
+    font-size: clamp(18rem, 40vw, 42rem);
+    font-weight: 800;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(255,255,255,0.035);
+    pointer-events: none;
+    line-height: 1;
+    z-index: 0;
+    letter-spacing: -0.05em;
+    user-select: none;
+  }
+
+  /* Footer */
+  footer {
+    padding: 2rem 0;
+    border-top: 1px solid var(--dim);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 1.2s forwards;
+  }
+
+  .footer-left {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .footer-right {
+    display: flex;
+    gap: 1.8rem;
+    align-items: center;
+  }
+
+  .footer-link {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-link:hover { color: var(--white); }
+
+  /* Tri-color dot: blue, gold, red */
+  .dot-wrap { display: flex; gap: 4px; align-items: center; }
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  .dot.b { background: var(--blue); animation-delay: 0s; }
+  .dot.g { background: var(--gold); animation-delay: 0.3s; }
+  .dot.r { background: var(--red);  animation-delay: 0.6s; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.3; transform: scale(0.65); }
+  }
+
+  .success-msg {
+    display: none;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    margin-top: 1rem;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(22px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 600px) {
+    .form-row { flex-direction: column; }
+    .email-input { border-right: 1px solid var(--dim); border-bottom: none; }
+    .footer-right { gap: 1rem; }
+    .badge { display: none; }
+    .region-tags { gap: 0.5rem; }
+  }
 </style>
 </head>
 <body>
 
-<div class="flag"></div>
-<canvas id="c"></canvas>
-<div class="noise"></div>
-<div class="scan"></div>
+<div class="flag-bg"></div>
+<div class="grid-lines"></div>
 
-<!-- corner brackets -->
-<div class="corner tl"><svg viewBox="0 0 28 28" fill="none"><path d="M1 14V1H14" stroke="#00ff88" stroke-width="1.2" stroke-opacity="0.4"/></svg></div>
-<div class="corner tr"><svg viewBox="0 0 28 28" fill="none"><path d="M1 14V1H14" stroke="#00ff88" stroke-width="1.2" stroke-opacity="0.4"/></svg></div>
-<div class="corner bl"><svg viewBox="0 0 28 28" fill="none"><path d="M1 14V1H14" stroke="#00ff88" stroke-width="1.2" stroke-opacity="0.4"/></svg></div>
-<div class="corner br"><svg viewBox="0 0 28 28" fill="none"><path d="M1 14V1H14" stroke="#00ff88" stroke-width="1.2" stroke-opacity="0.4"/></svg></div>
+<!-- Rotating sun rays -->
+<div class="sun-wrap" id="sunWrap"></div>
 
-<!-- side labels -->
-<div class="side-text side-left">Pilipinas · Cybersecurity · Community</div>
-<div class="side-text side-right">hackph.com · Est. 2025</div>
+<div class="corner-accent"></div>
+<div class="corner-accent-red"></div>
+<div class="watermark">PH</div>
 
-<main>
-  <div class="center">
-
-    <div class="big-title">
-      <span class="word-hack">Hack</span>
-      <span class="word-ph">PH</span>
-    </div>
-
-    <p class="statement">
-      <span class="line line-1">The Philippines has 120 million people.</span>
-      <span class="line line-2">Thousands of engineers. Millions of devices.</span>
-      <span class="line line-3">And almost <span class="accent">no one</span> teaching us how to defend them.</span>
-    </p>
-
-    <div class="divider">
-      <div class="divider-line"></div>
-      <div class="divider-icon">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <polygon points="8,1 15,5 15,11 8,15 1,11 1,5" stroke="#00ff88" stroke-width="1" fill="none" opacity="0.5"/>
-          <circle cx="8" cy="8" r="2" fill="#00ff88" opacity="0.4"/>
+<div class="page">
+  <header>
+    <div class="logo">
+      <!-- Philippine sun SVG -->
+      <div class="ph-sun">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- 8 rays -->
+          <g opacity="0.9">
+            <line x1="50" y1="50" x2="50" y2="4"  stroke="#FCD116" stroke-width="5" stroke-linecap="round"/>
+            <line x1="50" y1="50" x2="50" y2="96" stroke="#FCD116" stroke-width="5" stroke-linecap="round"/>
+            <line x1="50" y1="50" x2="4"  y2="50" stroke="#FCD116" stroke-width="5" stroke-linecap="round"/>
+            <line x1="50" y1="50" x2="96" y2="50" stroke="#FCD116" stroke-width="5" stroke-linecap="round"/>
+            <line x1="50" y1="50" x2="20" y2="20" stroke="#FCD116" stroke-width="3.5" stroke-linecap="round"/>
+            <line x1="50" y1="50" x2="80" y2="80" stroke="#FCD116" stroke-width="3.5" stroke-linecap="round"/>
+            <line x1="50" y1="50" x2="80" y2="20" stroke="#FCD116" stroke-width="3.5" stroke-linecap="round"/>
+            <line x1="50" y1="50" x2="20" y2="80" stroke="#FCD116" stroke-width="3.5" stroke-linecap="round"/>
+          </g>
+          <circle cx="50" cy="50" r="14" fill="#FCD116"/>
+          <circle cx="50" cy="50" r="7"  fill="#080C14"/>
         </svg>
       </div>
-      <div class="divider-line"></div>
+      <div class="logo-text">Hack<span class="ph">PH</span></div>
+    </div>
+    <div class="badge">Manila · 2025</div>
+  </header>
+
+  <main class="hero">
+    <p class="eyebrow">// Galing sa Pilipinas</p>
+    <h1 class="headline">We're<br/>build<em>ing.</em></h1>
+
+    <p class="tagline">
+      HackPH is the launchpad for <strong>Filipino builders, hackers, and makers</strong> — forged from 7,641 islands of ingenuity, resilience, and hustle. We launch soon.
+    </p>
+
+    <div class="stars-row">
+      <span class="star">★</span>
+      <span class="star">★</span>
+      <span class="star">★</span>
+      <span style="font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.15em;color:var(--muted);margin-left:0.4rem;text-transform:uppercase;">Luzon · Visayas · Mindanao</span>
     </div>
 
-    <div class="launch-line">
-      <span class="launch-dot"></span>
-      Launching Soon
-      <span class="launch-dot"></span>
+    <div class="countdown-wrap">
+      <p class="countdown-label">// Launching in</p>
+      <div class="countdown">
+        <div class="cd-unit">
+          <span class="cd-num" id="days">00</span>
+          <span class="cd-label">Days</span>
+        </div>
+        <span class="cd-sep">:</span>
+        <div class="cd-unit">
+          <span class="cd-num" id="hours">00</span>
+          <span class="cd-label">Hours</span>
+        </div>
+        <span class="cd-sep">:</span>
+        <div class="cd-unit">
+          <span class="cd-num" id="mins">00</span>
+          <span class="cd-label">Min</span>
+        </div>
+        <span class="cd-sep">:</span>
+        <div class="cd-unit">
+          <span class="cd-num" id="secs">00</span>
+          <span class="cd-label">Sec</span>
+        </div>
+      </div>
     </div>
 
-  </div>
-</main>
+    <div class="region-tags">
+      <span class="rtag l">Luzon</span>
+      <span class="rtag v">Visayas</span>
+      <span class="rtag m">Mindanao</span>
+      <span class="rtag">7,641 islands</span>
+      <span class="rtag">Diskarte culture</span>
+    </div>
 
-<div class="bottom-tag">The Philippines' Home for Ethical Hacking</div>
+    <div class="form-wrap">
+      <div class="form-row">
+        <input class="email-input" type="email" id="emailInput" placeholder="your@email.com" />
+        <button class="submit-btn" onclick="handleNotify()">Abisuhan ako</button>
+      </div>
+      <p class="form-note">// Walang spam. Pangako.</p>
+      <p class="success-msg" id="successMsg">✓ Naka-lista ka na. Kita tayo sa launch!</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-left">hackph.com &nbsp;·&nbsp; All rights reserved</div>
+    <div class="footer-right">
+      <div class="dot-wrap">
+        <div class="dot b"></div>
+        <div class="dot g"></div>
+        <div class="dot r"></div>
+      </div>
+      <a href="#" class="footer-link">Twitter</a>
+      <a href="#" class="footer-link">LinkedIn</a>
+      <a href="mailto:hello@hackph.com" class="footer-link">Contact</a>
+    </div>
+  </footer>
+</div>
 
 <script>
-// ── PARTICLE + MATRIX HYBRID CANVAS ──
-const canvas = document.getElementById('c');
-const ctx = canvas.getContext('2d');
-
-let W, H, cols, drops, particles;
-
-function resize() {
-  W = canvas.width  = window.innerWidth;
-  H = canvas.height = window.innerHeight;
-  initMatrix();
-}
-
-// Matrix rain
-const chars = '01アイウエオカキクHACKPH</>{}[]|\\'.split('');
-const FS = 14;
-
-function initMatrix() {
-  cols  = Math.floor(W / FS);
-  drops = Array.from({length: cols}, () => Math.random() * -(H / FS));
-}
-
-function drawMatrix() {
-  ctx.fillStyle = 'rgba(4,6,12,0.055)';
-  ctx.fillRect(0, 0, W, H);
-
-  ctx.font = `${FS}px 'Share Tech Mono', monospace`;
-
-  for (let i = 0; i < cols; i++) {
-    const y = drops[i] * FS;
-    const frac = drops[i] / (H / FS);
-    const alpha = Math.max(0.03, 0.4 - frac * 0.38);
-    const isHead = Math.random() > 0.97;
-
-    ctx.fillStyle = isHead ? 'rgba(255,255,255,0.9)' : `rgba(0,255,136,${alpha})`;
-    ctx.fillText(chars[Math.floor(Math.random() * chars.length)], i * FS, y);
-
-    if (y > H && Math.random() > 0.977) drops[i] = 0;
-    drops[i] += 0.3;
+  // Build sun rays
+  const wrap = document.getElementById('sunWrap');
+  const rayCount = 8;
+  for (let i = 0; i < rayCount; i++) {
+    const el = document.createElement('div');
+    el.className = 'sun-ray';
+    el.style.transform = `rotate(${i * (360 / rayCount)}deg)`;
+    wrap.appendChild(el);
   }
-}
 
-// Floating hex nodes
-class Node {
-  constructor() { this.reset(true); }
-  reset(init) {
-    this.x  = Math.random() * W;
-    this.y  = init ? Math.random() * H : H + 20;
-    this.vx = (Math.random() - 0.5) * 0.25;
-    this.vy = -(Math.random() * 0.4 + 0.1);
-    this.r  = Math.random() * 18 + 8;
-    this.a  = Math.random() * 0.25 + 0.04;
-    this.rot = Math.random() * Math.PI;
-    this.vr = (Math.random() - 0.5) * 0.003;
+  // Countdown ~90 days
+  const launch = new Date();
+  launch.setDate(launch.getDate() + 90);
+  launch.setHours(8, 0, 0, 0);
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function tick() {
+    const diff = launch - new Date();
+    if (diff <= 0) return;
+    document.getElementById('days').textContent  = pad(Math.floor(diff / 86400000));
+    document.getElementById('hours').textContent = pad(Math.floor((diff % 86400000) / 3600000));
+    document.getElementById('mins').textContent  = pad(Math.floor((diff % 3600000) / 60000));
+    document.getElementById('secs').textContent  = pad(Math.floor((diff % 60000) / 1000));
   }
-  update() {
-    this.x += this.vx; this.y += this.vy; this.rot += this.vr;
-    if (this.y < -40) this.reset(false);
-  }
-  draw() {
-    ctx.save();
-    ctx.translate(this.x, this.y);
-    ctx.rotate(this.rot);
-    ctx.beginPath();
-    for (let i = 0; i < 6; i++) {
-      const a = (Math.PI / 3) * i - Math.PI / 6;
-      const x = Math.cos(a) * this.r, y = Math.sin(a) * this.r;
-      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  tick();
+  setInterval(tick, 1000);
+
+  function handleNotify() {
+    const input = document.getElementById('emailInput');
+    if (!input.value || !input.value.includes('@')) {
+      input.style.borderColor = '#CE1126';
+      input.focus();
+      return;
     }
-    ctx.closePath();
-    ctx.strokeStyle = `rgba(0,255,136,${this.a})`;
-    ctx.lineWidth = 0.5;
-    ctx.stroke();
-    ctx.restore();
+    input.style.borderColor = '';
+    document.getElementById('successMsg').style.display = 'block';
+    input.value = '';
+    input.placeholder = 'done ✓';
+    input.disabled = true;
+    document.querySelector('.submit-btn').disabled = true;
+    document.querySelector('.submit-btn').textContent = 'Salamat!';
   }
-}
 
-particles = Array.from({length: 22}, () => new Node());
-
-function loop() {
-  drawMatrix();
-  particles.forEach(p => { p.update(); p.draw(); });
-  requestAnimationFrame(loop);
-}
-
-resize();
-window.addEventListener('resize', resize);
-loop();
+  document.getElementById('emailInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleNotify();
+  });
 </script>
 </body>
 </html>
